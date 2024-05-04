@@ -59,14 +59,14 @@ end component;
   U1: main port map(tb_clk,rst,tb_run,tb_rdy,tb_argument,tb_result);
   process
   variable 
-\$v2553\ : value(0 to 0) := (others => '0');
+\$v2262\ : value(0 to 0) := (others => '0');
 begin
     tb_run <= '0';
     wait for 10 ns;
     tb_run <= '1';
       -- Start computation
-      \$v2553\ := eclat_true;
-      tb_argument <= \$v2553\;
+      \$v2262\ := eclat_true;
+      tb_argument <= \$v2262\;
 
       wait for 10 ns;
       while tb_rdy = "0" loop

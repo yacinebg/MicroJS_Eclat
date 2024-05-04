@@ -51,6 +51,7 @@ let rec copy_args_to_heap(args, sp, env) =
   else
     (
       heap.(env) <- stack.(sp - args - 1);
+      print_string "copy heap["; print_int(env); print_string"] <-"; print_value(stack.(sp - args - 1)); print_newline();
       copy_args_to_heap(args - 1, sp, env +1)
     )
 ;;
@@ -90,9 +91,8 @@ let vm_run_instr (state : vm_state) : vm_state =
           ((sp+1, env, pc, fp), gp, hp, wg, finished)
   
   | I_FETCH (i) -> 
-    print_string "env "; print_int(env); print_newline();
-    print_string "Fetch["; print_int(env); print_string"] <-"; print_value(heap.(env)); print_newline();
-    print_string "Fetch["; print_int(env+i); print_string"] <-"; print_value(heap.(env+i)); print_newline();
+    (* print_string "env "; print_int(env); print_newline();
+    print_string "Fetch["; print_int(env+i); print_string"] <-"; print_value(heap.(env+i)); print_newline(); *)
 
     let local_value = heap.(env+i) in 
     stack.(sp) <- local_value; 
@@ -123,7 +123,7 @@ let vm_run_instr (state : vm_state) : vm_state =
       ((sp-1, env, new_pc, fp), gp, hp, wg, finished)
   | I_RETURN () ->
     let v = stack.(sp - 1) in
-    let (new_sp, new_env, new_pc, new_fp) = frames.(fp) in
+    let (new_sp, new_env, new_pc, new_fp) = frames.(fp-1) in
     stack.(new_sp) <- v;
     ((new_sp + 1, new_env, new_pc, new_fp), gp, hp, wg, finished)
       
@@ -144,9 +144,9 @@ let vm_run_instr (state : vm_state) : vm_state =
                                                 in 
                                                 add(arg-1,acc + int_value) ))
                                               in 
-            print_string "stack["; print_int(sp-n-1); print_string"] <-"; print_value(stack.(sp-n-1)); print_newline();
+            (* print_string "stack["; print_int(sp-n-1); print_string"] <-"; print_value(stack.(sp-n-1)); print_newline();
             print_string "stack["; print_int(sp-n); print_string"] <-"; print_value(stack.(sp-n)); print_newline();
-            print_string "stack["; print_int(sp-n+1); print_string"] <-"; print_value(stack.(sp-n+1)); print_newline();
+            print_string "stack["; print_int(sp-n+1); print_string"] <-"; print_value(stack.(sp-n+1)); print_newline(); *)
 
             let resultat = add(n,0) in
             stack.(sp - n -1) <- Int resultat;
@@ -171,7 +171,7 @@ let vm_run_instr (state : vm_state) : vm_state =
           let resultat = sub (n - 1, debut) in
           let absolute_res = if(resultat < 0 )then resultat*(-1) else resultat in
           stack.(sp - n - 1) <- Int absolute_res;
-          (* print_string "le resultat :stack["; print_int(sp - n - 1); print_string"] <-"; print_value(stack.(sp - n - 1)); print_newline(); *)
+          print_string "le resultat :stack["; print_int(sp - n - 1); print_string"] <-"; print_value(stack.(sp - n - 1)); print_newline();
           print_int(absolute_res); print_newline();
           ((sp - n, env, pc, fp), gp, hp, wg, finished))
 
@@ -248,21 +248,14 @@ let vm_run_instr (state : vm_state) : vm_state =
           | _ -> state
         end
         | Close (l,env_sp) -> 
-          let new_env  = env + n + 1 in
-          heap.(env) <- Int env;
-          print_string "stack["; print_int(sp-n-1); print_string"] <-"; print_value(stack.(sp-n-1)); print_newline();
-          print_string "stack["; print_int(sp-n); print_string"] <-"; print_value(stack.(sp-n)); print_newline();
-          print_string "stack["; print_int(sp-n+1); print_string"] <-"; print_value(stack.(sp-n+1)); print_newline();
-          let new_sp = copy_args_to_heap (n, sp, env+1) in
-
-          print_string "heap["; print_int(env); print_string"] <-"; print_value(heap.(env)); print_newline();
-          print_string "heap["; print_int(env+1); print_string"] <-"; print_value(heap.(env+1)); print_newline();
-          print_string "heap["; print_int(env+2); print_string"] <-"; print_value(heap.(env+2)); print_newline();
-
-          frames.(fp) <- (sp-n-1, env-1, pc, fp);
+          let new_env  = hp in
+          let new_hp = hp + n + 1 in 
+          heap.(new_hp-1) <- Int env;
+          let new_sp = copy_args_to_heap (n, sp, new_env) in
+          frames.(fp) <- (sp-n-1, env, pc, fp);
           let new_fp = fp + 1 in
-          frames.(new_fp) <- (sp-n-1 , new_env , l - 1, fp);
-          ((sp-n-1 , env_sp+1 , l - 1, fp), gp, hp , wg, finished)
+          frames.(new_fp)<-(sp-n-1 , env_sp , pc, fp);
+          ((sp-n-1 , new_env , l - 1, new_fp), gp, new_hp , wg, finished)
       | _ -> state 
     end
           (*    

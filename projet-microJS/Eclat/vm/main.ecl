@@ -176,7 +176,7 @@ let load_bytecode_inc () =
     code.(21) <- I_RETURN();
     code.(22) <- I_PUSH_FUN (2);
     code.(23) <- I_GSTORE 0;
-    code.(24) <- I_PUSH (Int 3);
+    code.(24) <- I_PUSH (Int 4);
     code.(25) <- I_GFETCH 0;
     code.(26) <- I_CALL (1);
     code.(27) <- I_POP();
@@ -234,6 +234,35 @@ let load_bytecode_inc () =
     code.(23) <- I_GFETCH 0;
     code.(24) <- I_CALL (3);
     code.(25) <- I_POP();
+    code.(26) <- I_PUSH (Int 3);
+    code.(27) <- I_PUSH (Int 2);
+    code.(28) <- I_PUSH (Int 1);
+    code.(29) <- I_GFETCH 0;
+    code.(30) <- I_CALL (3);
+    code.(31) <- I_POP();
+    () ;;
+
+  let load_bytecode_ha () =
+    code.(0) <- I_GALLOC();
+    code.(1) <- I_PUSH (Int 9);
+    code.(2) <- I_GSTORE 0;
+    code.(3) <- I_GALLOC();
+    code.(4) <- I_JUMP 15;
+    code.(5) <- I_GALLOC();
+    code.(6) <- I_PUSH (Int 2);
+    code.(7) <- I_GFETCH 0;
+    code.(8) <- I_PUSH (Prim (P_ADD()));
+    code.(9) <- I_CALL (2);
+    code.(10) <- I_GSTORE 2;
+    code.(11) <- I_GFETCH 2;
+    code.(12) <- I_RETURN();
+    code.(13) <- I_PUSH (Nil());
+    code.(14) <- I_RETURN();
+    code.(15) <- I_PUSH_FUN (5);
+    code.(16) <- I_GSTORE 1;
+    code.(17) <- I_GFETCH 1;
+    code.(18) <- I_CALL (0);
+    code.(19) <- I_POP();
     () ;;
 let init_state = ((0,0,0,0),0,0,(false,(0,Nil())),false) ;;
 
